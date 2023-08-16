@@ -1,40 +1,39 @@
-import { LightningElement, wire, track } from 'lwc';
-import gatherIceCreamSales from '@salesforce/apex/IceCreamSalesTableController.gatherIceCreamSales';
+import { LightningElement, track } from 'lwc';
+import getOpportunitiesByCity from '@salesforce/apex/IceCreamSalesTableController.getOpportunitiesByCity';
 
 const STORE_OPTIONS = [
+    { label: 'None', value: '' },
     { label: 'Anaheim', value: 'Anaheim' },
     { label: 'Los Angeles', value: 'Los Angeles' },
     { label: 'Santa Monica', value: 'Santa Monica' }
 ];
 
 const COLUMNS = [
-    { label: 'Store Name', fieldName: 'Store__r.Name', type: 'text' },
-    { label: 'State', fieldName: 'Store__r.State__c', type: 'text' },
-    { label: 'City', fieldName: 'Store__r.City__c', type: 'text' },
-    { label: 'Amount', fieldName: 'Amount', type: 'currency',typeAttributes: { currencyCode: 'USD', step: '0.001' },},
-    { label: 'Close Date', fieldName: 'CloseDate', type: 'date' }
+    { label: 'Opportunity Name', fieldName: 'opportunityName', type: 'text' },
+    { label: 'Stage', fieldName: 'stageName', type: 'text' },
+    { label: 'Close Date', fieldName: 'closeDate', type: 'date' },
+    { label: 'Store Name', fieldName: 'storeName', type: 'text' },
+    { label: 'City', fieldName: 'city', type: 'text' },
+    { label: 'State', fieldName: 'state', type: 'text' }
 ];
 
 export default class StoreOpportunityTable extends LightningElement {
-    @track selectedStore = 'Anaheim';
+    @track selectedStore = '';
     @track storeOptions = STORE_OPTIONS;
     @track opportunityData = [];
     columns = COLUMNS;
+
+    renderedCallback(){
+        this.fetchOpportunities();
+    }
 
     handleStoreChange(event) {
         this.selectedStore = event.detail.value;
         this.fetchOpportunities();
     }
 
-    @wire(gatherIceCreamSales, { storeName: '$selectedStore' })
-    wiredOpportunities({ error, data }) {
-        if (data) {
-            this.opportunityData = data;
-        }
-    }
-
     fetchOpportunities() {
-        gatherIceCreamSales({ storeName: this.selectedStore })
+        getOpportunitiesByCity({ city: this.selectedStore })
             .then((result) => {
                 this.opportunityData = result;
             })
@@ -42,4 +41,5 @@ export default class StoreOpportunityTable extends LightningElement {
                 console.error('Error fetching opportunities:', error);
             });
     }
+    
 }
