@@ -13,15 +13,20 @@
                 <div class="demo-only" style="padding:0.5rem;background:#16325c">
                     <div class="slds-text-color_inverse"><p>Total Dollar Amount of Sales in Table: <lightning-formatted-number value={totalAmount} format-style="currency" currency-code="USD"></lightning-formatted-number></p></div>
                   </div>
-                <lightning-datatable
-                    data={opportunityData}
-                    columns={columns}
-                    key-field="opportunityId"
-                    hide-checkbox-column
-                    onsort={handleSort}
-                    sorted-by={sortBy}
-                    sorted-direction={sortDirection}>
-                </lightning-datatable>
+                <template if:true={opportunityData.length}>
+                    <lightning-datatable
+                        data={opportunityData}
+                        columns={columns}
+                        key-field="opportunityId"
+                        hide-checkbox-column
+                        onsort={handleSort}
+                        sorted-by={sortBy}
+                        sorted-direction={sortDirection}>
+                    </lightning-datatable>
+                </template>
+                <template if:false={opportunityData.length}>
+                    <div class="slds-text-heading_medium slds-text-align_center slds-m-top_x-large slds-m-bottom_x-large">There are no records to display. Please change your filters.</div>
+                </template>
             </div>
         </div>
     </lightning-card>

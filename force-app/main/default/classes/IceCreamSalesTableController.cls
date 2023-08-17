@@ -17,7 +17,9 @@ public with sharing class IceCreamSalesTableController {
         if (!String.isBlank(city)) {
             query += ' WHERE Store__r.City__c = \'' + city + '\'';
         }
-        
+
+        query += ' ORDER BY Amount DESC';
+
         List<OpportunityStoreWrapper> result = new List<OpportunityStoreWrapper>();
         for (Opportunity opp : Database.query(query)) {
             OpportunityStoreWrapper wrapper = new OpportunityStoreWrapper();

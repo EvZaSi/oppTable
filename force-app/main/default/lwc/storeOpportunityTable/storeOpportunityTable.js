@@ -28,7 +28,7 @@ export default class StoreOpportunityTable extends LightningElement {
     columns = COLUMNS;
     @track totalAmount = 0;
     @track sortBy='Amount'; 
-    @track sortDirection='asc'; 
+    @track sortDirection='asc';
 
     renderedCallbackCalled = false;
 
