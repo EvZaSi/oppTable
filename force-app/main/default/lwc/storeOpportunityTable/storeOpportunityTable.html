@@ -1,17 +1,23 @@
 <template>
-    <lightning-card title="Opportunity Store Table">
+    <lightning-card title="Ice Cream Sales">
         <div class="slds-m-around_medium">
-            <lightning-combobox
-                label="Select Store"
-                value={selectedStore}
-                options={storeOptions}
-                onchange={handleStoreChange}>
-            </lightning-combobox>
+            <template if:true={cityPicklistValues.data}>
+                <lightning-combobox
+                    label="Select Store"
+                    value={selectedStore}
+                    options={cityPicklistValues.data.values}
+                    onchange={handleStoreChange}>
+                </lightning-combobox>
+            </template>
             <div class="slds-m-top_medium">
+                <div class="demo-only" style="padding:0.5rem;background:#16325c">
+                    <div class="slds-text-color_inverse"><p>Total Dollar Amount of Sales in Table: <lightning-formatted-number value={totalAmount} format-style="currency" currency-code="USD"></lightning-formatted-number></p></div>
+                  </div>
                 <lightning-datatable
                     data={opportunityData}
                     columns={columns}
-                    key-field="opportunityId">
+                    key-field="opportunityId"
+                    hide-checkbox-column>
                 </lightning-datatable>
             </div>
         </div>

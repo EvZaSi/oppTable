@@ -7,11 +7,12 @@ public with sharing class IceCreamSalesTableController {
         @AuraEnabled public String storeName { get; set; }
         @AuraEnabled public String city { get; set; }
         @AuraEnabled public String state { get; set; }
+        @AuraEnabled public Decimal amount {get; set; }
     }
 
     @AuraEnabled(cacheable=true)
     public static List<OpportunityStoreWrapper> getOpportunitiesByCity(String city) {
-        String query = 'SELECT Id, Name, StageName, CloseDate, Store__c, Store__r.Name, Store__r.City__c, Store__r.State__c FROM Opportunity';
+        String query = 'SELECT Id, Name, StageName, CloseDate, Store__c, Store__r.Name, Store__r.City__c, Store__r.State__c,Amount FROM Opportunity';
         
         if (!String.isBlank(city)) {
             query += ' WHERE Store__r.City__c = \'' + city + '\'';
@@ -27,6 +28,7 @@ public with sharing class IceCreamSalesTableController {
             wrapper.storeName = opp.Store__r.Name;
             wrapper.city = opp.Store__r.City__c;
             wrapper.state = opp.Store__r.State__c;
+            wrapper.amount = opp.Amount;
             
             result.add(wrapper);
         }
