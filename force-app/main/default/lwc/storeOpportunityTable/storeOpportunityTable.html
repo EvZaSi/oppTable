@@ -17,7 +17,10 @@
                     data={opportunityData}
                     columns={columns}
                     key-field="opportunityId"
-                    hide-checkbox-column>
+                    hide-checkbox-column
+                    onsort={handleSort}
+                    sorted-by={sortBy}
+                    sorted-direction={sortDirection}>
                 </lightning-datatable>
             </div>
         </div>
