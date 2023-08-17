@@ -38,19 +38,31 @@ export default class StoreOpportunityTable extends LightningElement {
     @wire(getPicklistValues, { recordTypeId: '$storeInfo.data.defaultRecordTypeId', fieldApiName: CITY_FIELD})
     cityPicklistValues;
 
+
+    get cityOptions() {
+        let options = [];
+        if (this.cityPicklistValues && this.cityPicklistValues.data) {
+            options.push({ label: 'All Cities', value: '' });
+            options = options.concat(this.cityPicklistValues.data.values);
+        }
+        return options;
+    }
+
     //Fetches data after rendering complete and sums up total amount
     renderedCallback(){
-        if(this.renderedCallbackCalled === false){
-            console.log('renderedCallback');
+        if(!this.renderedCallbackCalled){
             this.fetchOpportunities();
             this.renderedCallbackCalled = true;
         }
     }
 
     handleStoreChange(event) {
-        this.selectedStore = event.detail.value;
-        this.fetchOpportunities();
-        
+        try {
+            this.selectedStore = event.detail.value;
+            this.fetchOpportunities();
+        } catch (error) {
+            console.error('Error handling store change:', error);
+        }
     }
 
     fetchOpportunities() {
@@ -65,17 +77,25 @@ export default class StoreOpportunityTable extends LightningElement {
     }
     
     calculateTotalAmount() {
-        let total = 0;
-        this.opportunityData.forEach((opp) => {
-            total += opp.amount;
-        });
-        this.totalAmount = total;
+        try {
+            let total = 0;
+            this.opportunityData.forEach((opp) => {
+                total += opp.amount || 0; // Handle null values
+            });
+            this.totalAmount = total;
+        } catch (error) {
+            console.error('Error calculating total amount:', error);
+        }
     }
 
     handleSort(event) {
-        this.sortBy = event.detail.fieldName;
-        this.sortDirection = event.detail.sortDirection;
-        this.sortData(this.sortBy, this.sortDirection);
+        try {
+            this.sortBy = event.detail.fieldName;
+            this.sortDirection = event.detail.sortDirection;
+            this.sortData(this.sortBy, this.sortDirection);
+        } catch (error) {
+            console.error('Error with handle sort function:', error);
+        }
     }
 
     sortData(fieldname, direction) {

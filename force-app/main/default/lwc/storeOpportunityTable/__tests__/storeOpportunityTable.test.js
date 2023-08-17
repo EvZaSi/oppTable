@@ -1,43 +1,63 @@
 import { createElement } from 'lwc';
-import StoreOpportunityTable from 'c/storeOpportunityTable';
-import { createApexTestWireAdapter } from '@salesforce/sfdx-lwc-jest';
+import StoreOpportunityTable from 'c/storeOpportunityTable'; 
 import getOpportunitiesByCity from '@salesforce/apex/IceCreamSalesTableController.getOpportunitiesByCity';
 
-// Mock the Apex method using registerApexTestWireAdapter
-const getOpportunitiesByCityAdapter = createApexTestWireAdapter(getOpportunitiesByCity);
+jest.mock(
+    '@salesforce/apex/IceCreamSalesTableController.getOpportunitiesByCity',
+    () => ({
+        default: jest.fn()
+    }),
+    { virtual: true }
+);
 
-describe('c-store-opportunity-table', () => {
+describe('c-datatable', () => {
     afterEach(() => {
+        // The jsdom instance is shared across test cases in a single file so reset the DOM
         while (document.body.firstChild) {
             document.body.removeChild(document.body.firstChild);
         }
+        // Prevent data saved on mocks from leaking between tests
         jest.clearAllMocks();
     });
 
-    it('displays opportunities with total amount', async () => {
+    // Helper function to wait until the microtask queue is empty.
+    // This is needed for promise timing.
+    async function flushPromises() {
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        return new Promise((resolve) => setTimeout(resolve, 0));
+    }
 
-        // Mock the data returned by the Apex method
-        const mockOpportunityData = [
-            { opportunityName: 'Test Opportunity 1', stageName: 'Closed Won', closeDate: '2023-08-01', storeName: 'Anaheim', city: 'Anaheim', state: 'CA', amount: 100 },
-            { opportunityName: 'Test Opportunity 2', stageName: 'Prospecting', closeDate: '2023-08-15', storeName: 'Los Angeles', city: 'Los Angeles', state: 'CA', amount: 200 }
-        ];
-        getOpportunitiesByCityAdapter.emit(mockOpportunityData);
+    it('displays no records message when no opportunities are returned', () => {
+        getOpportunitiesByCity.mockResolvedValue([]);
+        const element = createElement('c-store-opportunity-table', {
+            is: StoreOpportunityTable
+        });
 
-        // Create the component
+        document.body.appendChild(element);
+
+        const noRecordsMessage = element.shadowRoot.querySelector('.slds-text-heading_medium');
+        expect(noRecordsMessage.textContent).toBe('There are no records to display. Please change your filters.');
+    });
+
+    it('fetches opportunities and updates total amount when opportunities loaded', async () => {
+        getOpportunitiesByCity.mockResolvedValue([{ opportunityName: 'Opportunity A', amount: 150 }, { opportunityName: 'Opportunity B', amount: 100 }]);
+
         const element = createElement('c-store-opportunity-table', {
             is: StoreOpportunityTable
         });
         document.body.appendChild(element);
 
         // Wait for any asynchronous DOM updates
-        await Promise.resolve();
+        await flushPromises();
 
-        // Validate that total amount is displayed correctly
-        const datatable = element.shadowRoot.querySelector('lightning-datatable');
-        expect(datatable.data.length).toBe(mockOpportunityData.length);
-
-        const totalAmount = element.shadowRoot.querySelector('p');
-        expect(totalAmount.textContent).toBe(`Total Amount: ${mockOpportunityData.reduce((sum, opp) => sum + opp.amount, 0)}`);
+        // Verify the rendered data
+        const table = element.shadowRoot.querySelector('lightning-datatable');
+        console.log(JSON.stringify(table.data));
+        expect(table.data.length).toBe(2);
+        
+        // Verify total amount
+        const totalAmount = element.shadowRoot.querySelector('lightning-formatted-number');
+        expect(totalAmount.value).toBe(250);
     });
 
 });
